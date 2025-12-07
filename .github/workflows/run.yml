@@ -36,7 +36,6 @@ jobs:
 
           # Rule URLs
           echo "OISD_FULL=https://big.oisd.nl/dnsmasq" >> $GITHUB_ENV
-          echo "OISD_SMALL=https://small.oisd.nl/dnsmasq" >> $GITHUB_ENV
           echo "HAGEZI_NSFW=https://codeberg.org/hagezi/mirror2/raw/branch/main/dns-blocklists/dnsmasq/nsfw.txt" >> $GITHUB_ENV
           echo "DOH_DNS=https://raw.githubusercontent.com/dibdot/DoH-IP-blocklists/master/doh-domains.txt" >> $GITHUB_ENV
           echo "RULE_ADS=https://raw.githubusercontent.com/d3ward/toolz/master/src/d3host.txt" >> $GITHUB_ENV
@@ -95,7 +94,6 @@ jobs:
       - name: Create Custom Lists
         run: |
           curl -sSL "$OISD_FULL"  | perl -ne '/^server=\/([^\/]+)\// && print "$1\n"' > community/data/oisd-full
-          curl -sSL "$OISD_SMALL" | perl -ne '/^server=\/([^\/]+)\// && print "$1\n"' > community/data/oisd-small
 
           curl -sSL "$RULE_ADS" | awk '/0.0.0.0/{print $2}' > community/data/rule-ads
           curl -sSL "$RULE_ADS_EXTENDED" >> community/data/rule-ads
