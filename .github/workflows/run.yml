@@ -18,23 +18,26 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # ---------------------------
-      # 1. Generate timestamp tag
-      # ---------------------------
-      - name: Generate Release Tag
+      # --------------------------------------------------------------
+      # 1. Generate timestamp tag (WIB +7) + environment variables
+      # --------------------------------------------------------------
+      - name: Generate Release Tag (WIB +7)
         id: vars
         run: |
-          # Custom order: HHMMDDMMYYYY
+          # Use WIB / Asia-Jakarta timezone
+          export TZ="Asia/Jakarta"
+
+          # Custom format: HHMMDDMMYYYY
           TAG_NAME=$(date +%H%M%d%m%Y)
-          RELEASE_NAME="Released on $TAG_NAME"
+          RELEASE_NAME="Released on $TAG_NAME (WIB)"
 
           echo "TAG_NAME=$TAG_NAME" >> $GITHUB_ENV
           echo "RELEASE_NAME=$RELEASE_NAME" >> $GITHUB_ENV
 
-          # URLs
-          echo "OISD_FULL=https://big.oisd.nl/dnsmasq"          >> $GITHUB_ENV
-          echo "OISD_SMALL=https://small.oisd.nl/dnsmasq"        >> $GITHUB_ENV
-          echo "OISD_NSFW=https://nsfw.oisd.nl/dnsmasq"         >> $GITHUB_ENV
+          # Rule URLs
+          echo "OISD_FULL=https://big.oisd.nl/dnsmasq" >> $GITHUB_ENV
+          echo "OISD_SMALL=https://small.oisd.nl/dnsmasq" >> $GITHUB_ENV
+          echo "OISD_NSFW=https://nsfw.oisd.nl/dnsmasq" >> $GITHUB_ENV
           echo "DOH_DNS=https://raw.githubusercontent.com/dibdot/DoH-IP-blocklists/master/doh-domains.txt" >> $GITHUB_ENV
           echo "RULE_ADS=https://raw.githubusercontent.com/d3ward/toolz/master/src/d3host.txt" >> $GITHUB_ENV
           echo "RULE_ADS_EXTENDED=https://raw.githubusercontent.com/rfxcll/v2ray-rules-dat/rule/rule_ads.txt" >> $GITHUB_ENV
@@ -52,12 +55,12 @@ jobs:
           echo "RULE_BANK_ID=https://raw.githubusercontent.com/rfxcll/v2ray-rules-dat/rule/rule_bank-id.txt" >> $GITHUB_ENV
           echo "RULE_ECOMMERCE=https://raw.githubusercontent.com/rfxcll/v2ray-rules-dat/rule/rule_ecommerce.txt" >> $GITHUB_ENV
 
-      # ---------------------------
-      # 2. Checkout sources
-      # ---------------------------
+      # --------------------------------------------------------------
+      # 2. Checkout source repositories
+      # --------------------------------------------------------------
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Needed for tagging
+          fetch-depth: 0
 
       - uses: actions/checkout@v4
         with:
@@ -69,39 +72,36 @@ jobs:
           repository: v2fly/domain-list-community
           path: community
 
-      # ---------------------------
+      # --------------------------------------------------------------
       # 3. Setup Go
-      # ---------------------------
+      # --------------------------------------------------------------
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
           go-version-file: ./custom/go.mod
           cache-dependency-path: ./custom/go.sum
 
-      # ---------------------------
+      # --------------------------------------------------------------
       # 4. Download geoip.dat
-      # ---------------------------
+      # --------------------------------------------------------------
       - name: Download geoip.dat
         run: |
           wget https://github.com/malikshi/geoip/raw/release/geoip.dat
           wget https://github.com/malikshi/geoip/raw/release/geoip.dat.sha256sum
 
-      # ---------------------------
+      # --------------------------------------------------------------
       # 5. Generate custom lists
-      # ---------------------------
+      # --------------------------------------------------------------
       - name: Create Custom Lists
         run: |
-          # oisd
           curl -sSL "$OISD_FULL"  | perl -ne '/^server=\/([^\/]+)\// && print "$1\n"' > community/data/oisd-full
           curl -sSL "$OISD_SMALL" | perl -ne '/^server=\/([^\/]+)\// && print "$1\n"' > community/data/oisd-small
 
-          # ads
           curl -sSL "$RULE_ADS" | awk '/0.0.0.0/{print $2}' > community/data/rule-ads
           curl -sSL "$RULE_ADS_EXTENDED" >> community/data/rule-ads
 
           curl -sSL "$OISD_NSFW"  | perl -ne '/^server=\/([^\/]+)\// && print "$1\n"' > community/data/oisd-nsfw
 
-          # single-file rules
           curl -sSo community/data/rule-doh "$DOH_DNS"
           curl -sSo community/data/rule-gaming "$RULE_GAME"
           curl -sSo community/data/rule-indo "$RULE_INDO"
@@ -117,7 +117,7 @@ jobs:
           curl -sSo community/data/bank-id "$RULE_BANK_ID"
           curl -sSo community/data/ecommerce-id "$RULE_ECOMMERCE"
 
-      # d3ward processing
+      # Filter d3ward list
       - name: Filter d3ward list
         run: |
           python <<EOF
@@ -130,17 +130,17 @@ jobs:
                       f.write(line.replace("0.0.0.0 ", "") + "\n")
           EOF
 
-      # ---------------------------
+      # --------------------------------------------------------------
       # 6. Build geosite.dat
-      # ---------------------------
+      # --------------------------------------------------------------
       - name: Build geosite
         run: |
           cd custom
           go run ./ --datapath=../community/data
 
-      # ---------------------------
+      # --------------------------------------------------------------
       # 7. Package files
-      # ---------------------------
+      # --------------------------------------------------------------
       - name: Package files
         run: |
           mkdir -p publish
@@ -153,13 +153,14 @@ jobs:
           sha256sum GeoSite.dat > GeoSite.dat.sha256sum
           sha256sum Geo-files.zip > Geo-files.zip.sha256sum
 
-      # ---------------------------
+      # --------------------------------------------------------------
       # 8. Convert to Sing-Box DB
-      # ---------------------------
+      # --------------------------------------------------------------
       - name: Convert to Sing-Box DB
         run: |
           wget https://github.com/malikshi/Notes/releases/download/v2box/v2box
           chmod +x v2box
+
           ./v2box migrate geoip -i publish/GeoIP.dat -o publish/GeoIP.db
           ./v2box migrate geosite -i publish/GeoSite.dat -o publish/GeoSite.db
 
@@ -167,9 +168,9 @@ jobs:
           sha256sum GeoSite.db > GeoSite.db.sha256sum
           sha256sum GeoIP.db > GeoIP.db.sha256sum
 
-      # ---------------------------
-      # 9. Create & push release tag
-      # ---------------------------
+      # --------------------------------------------------------------
+      # 9. Create & push tag (important)
+      # --------------------------------------------------------------
       - name: Push tag for release
         run: |
           git config user.name "github-actions[bot]"
@@ -177,9 +178,9 @@ jobs:
           git tag "$TAG_NAME"
           git push origin "$TAG_NAME"
 
-      # ---------------------------
-      # 10. Create release & upload assets
-      # ---------------------------
+      # --------------------------------------------------------------
+      # 10. Create GitHub Release + upload assets
+      # --------------------------------------------------------------
       - name: Create GitHub Release
         uses: svenstaro/upload-release-action@v2
         with:
@@ -189,9 +190,9 @@ jobs:
           file: ./publish/*
           file_glob: true
 
-      # ---------------------------
-      # 11. Push assets to release branch
-      # ---------------------------
+      # --------------------------------------------------------------
+      # 11. Push files to release branch
+      # --------------------------------------------------------------
       - name: Push files to release branch
         run: |
           cd publish
@@ -204,9 +205,9 @@ jobs:
           git remote add origin "https://${{ github.actor }}:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}"
           git push -f -u origin release
 
-      # ---------------------------
-      # 12. Purge jsDelivr CDN
-      # ---------------------------
+      # --------------------------------------------------------------
+      # 12. Purge jsDelivr CDN cache
+      # --------------------------------------------------------------
       - name: Purge jsDelivr CDN
         run: |
           cd publish
@@ -214,9 +215,9 @@ jobs:
             curl -i "https://purge.jsdelivr.net/gh/${{ github.repository }}@release/$f"
           done
 
-      # ---------------------------
+      # --------------------------------------------------------------
       # 13. Delete old releases
-      # ---------------------------
+      # --------------------------------------------------------------
       - name: Delete old releases
         uses: dev-drprasad/delete-older-releases@v0.3.4
         with:
