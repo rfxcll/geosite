@@ -75,7 +75,7 @@ jobs:
       # 3. Setup Go
       # --------------------------------------------------------------
       - name: Setup Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v6
         with:
           go-version-file: ./custom/go.mod
           cache-dependency-path: ./custom/go.sum
