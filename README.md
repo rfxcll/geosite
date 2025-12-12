@@ -5,9 +5,8 @@ Generate custom geosite and geoip based on [Loyalsoldier](https://github.com/Loy
 ## GEOSITE.DAT
 
 - Contains the following list:
-  - `geosite:oisd-full`
-  - `geosite:oisd-small`
-  - `geosite:oisd-nsfw`
+  - `geosite:hagezi-pro-full`
+  - `geosite:hagezi-nsfw`
   - `geosite:rule-ads`
   - `geosite:rule-doh`
   - `geosite:rule-gaming`
@@ -25,7 +24,7 @@ Generate custom geosite and geoip based on [Loyalsoldier](https://github.com/Loy
   - `geosite:ecommerce-id`
   - `geosite:bank-id`
 
-> More details for addtional [list](https://github.com/rfxcll/v2ray-rules-dat/blob/master/.github/workflows/run.yml#L26)
+> More details for addtional [list](https://github.com/rfxcll/v2ray-rules-dat/blob/master/.github/workflows/run.yml#L38)
 
 
 ## GEOIP.DAT
