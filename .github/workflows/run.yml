@@ -35,7 +35,7 @@ jobs:
           echo "RELEASE_NAME=$RELEASE_NAME" >> $GITHUB_ENV
 
           # Rule URLs
-          echo "HAGEZI_PRO_FULL=https://codeberg.org/hagezi/mirror2/raw/branch/main/dns-blocklists/dnsmasq/pro.txt" >> $GITHUB_ENV
+          echo "HAGEZI_PRO_MINI=https://codeberg.org/hagezi/mirror2/raw/branch/main/dns-blocklists/dnsmasq/pro.mini.txt" >> $GITHUB_ENV
           echo "HAGEZI_NSFW=https://codeberg.org/hagezi/mirror2/raw/branch/main/dns-blocklists/dnsmasq/nsfw.txt" >> $GITHUB_ENV
           echo "DOH_DNS=https://raw.githubusercontent.com/dibdot/DoH-IP-blocklists/master/doh-domains.txt" >> $GITHUB_ENV
           echo "RULE_ADS=https://raw.githubusercontent.com/d3ward/toolz/master/src/d3host.txt" >> $GITHUB_ENV
@@ -93,7 +93,7 @@ jobs:
       # --------------------------------------------------------------
       - name: Create Custom Lists
         run: |
-          curl -sSL "$HAGEZI_PRO_FULL"  | perl -ne '/^local=\/([^\/]+)\// && print "$1\n"' > community/data/hagezi-pro-full
+          curl -sSL "$HAGEZI_PRO_MINI"  | perl -ne '/^local=\/([^\/]+)\// && print "$1\n"' > community/data/hagezi-pro-mini
           curl -sSL "$RULE_ADS" | awk '/0.0.0.0/{print $2}' > community/data/rule-ads
           curl -sSL "$RULE_ADS_EXTENDED" >> community/data/rule-ads
           curl -sSL "$HAGEZI_NSFW"  | perl -ne '/^local=\/([^\/]+)\// && print "$1\n"' > community/data/hagezi-nsfw
