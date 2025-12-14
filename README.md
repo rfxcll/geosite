@@ -5,7 +5,7 @@ Generate custom geosite and geoip based on [Loyalsoldier](https://github.com/Loy
 ## GEOSITE.DAT
 
 - Contains the following list:
-  - `geosite:hagezi-pro-full`
+  - `geosite:hagezi-pro-mini`
   - `geosite:hagezi-nsfw`
   - `geosite:rule-ads`
   - `geosite:rule-doh`
