@@ -37,9 +37,6 @@ jobs:
           # Rule URLs
           echo "HAGEZI_PRO_MINI=https://codeberg.org/hagezi/mirror2/raw/branch/main/dns-blocklists/dnsmasq/pro.mini.txt" >> $GITHUB_ENV
           echo "HAGEZI_NSFW=https://codeberg.org/hagezi/mirror2/raw/branch/main/dns-blocklists/dnsmasq/nsfw.txt" >> $GITHUB_ENV
-          echo "DOH_DNS=https://raw.githubusercontent.com/dibdot/DoH-IP-blocklists/master/doh-domains.txt" >> $GITHUB_ENV
-          echo "RULE_ADS=https://raw.githubusercontent.com/d3ward/toolz/master/src/d3host.txt" >> $GITHUB_ENV
-          echo "RULE_ADS_EXTENDED=https://raw.githubusercontent.com/rfxcll/v2ray-rules-dat/rule/rule_ads.txt" >> $GITHUB_ENV
           echo "RULE_GAME=https://raw.githubusercontent.com/rfxcll/v2ray-rules-dat/rule/rule_gaming.txt" >> $GITHUB_ENV
           echo "RULE_INDO=https://raw.githubusercontent.com/rfxcll/v2ray-rules-dat/rule/rule_indo.txt" >> $GITHUB_ENV
           echo "RULE_PS=https://raw.githubusercontent.com/rfxcll/v2ray-rules-dat/rule/rule_playstore.txt" >> $GITHUB_ENV
@@ -50,7 +47,6 @@ jobs:
           echo "RULE_VIDCONFERENCE=https://raw.githubusercontent.com/rfxcll/v2ray-rules-dat/rule/rule_videoconference.txt" >> $GITHUB_ENV
           echo "URLTEST=https://raw.githubusercontent.com/rfxcll/v2ray-rules-dat/rule/urltest.txt" >> $GITHUB_ENV
           echo "RULE_SPEEDTEST=https://raw.githubusercontent.com/rfxcll/v2ray-rules-dat/rule/rule_speedtest.txt" >> $GITHUB_ENV
-          echo "MALICIOUS_HOST=https://raw.githubusercontent.com/elliotwutingfeng/Inversion-DNSBL-Blocklists/main/Google_hostnames_light.txt" >> $GITHUB_ENV
           echo "RULE_BANK_ID=https://raw.githubusercontent.com/rfxcll/v2ray-rules-dat/rule/rule_bank-id.txt" >> $GITHUB_ENV
           echo "RULE_ECOMMERCE=https://raw.githubusercontent.com/rfxcll/v2ray-rules-dat/rule/rule_ecommerce.txt" >> $GITHUB_ENV
 
@@ -94,11 +90,7 @@ jobs:
       - name: Create Custom Lists
         run: |
           curl -sSL "$HAGEZI_PRO_MINI"  | perl -ne '/^local=\/([^\/]+)\// && print "$1\n"' > community/data/hagezi-pro-mini
-          curl -sSL "$RULE_ADS" | awk '/0.0.0.0/{print $2}' > community/data/rule-ads
-          curl -sSL "$RULE_ADS_EXTENDED" >> community/data/rule-ads
           curl -sSL "$HAGEZI_NSFW"  | perl -ne '/^local=\/([^\/]+)\// && print "$1\n"' > community/data/hagezi-nsfw
-
-          curl -sSo community/data/rule-doh "$DOH_DNS"
           curl -sSo community/data/rule-gaming "$RULE_GAME"
           curl -sSo community/data/rule-indo "$RULE_INDO"
           curl -sSo community/data/rule-playstore "$RULE_PS"
@@ -109,22 +101,8 @@ jobs:
           curl -sSo community/data/rule-ipcheck "$RULE_IPCHECK"
           curl -sSo community/data/videoconference "$RULE_VIDCONFERENCE"
           curl -sSo community/data/urltest "$URLTEST"
-          curl -sSo community/data/rule-malicious "$MALICIOUS_HOST"
           curl -sSo community/data/bank-id "$RULE_BANK_ID"
           curl -sSo community/data/ecommerce-id "$RULE_ECOMMERCE"
-
-      # Filter d3ward list
-      - name: Filter d3ward list
-        run: |
-          python <<EOF
-          import requests
-          url = "https://raw.githubusercontent.com/d3ward/toolz/master/src/d3host.txt"
-          data = requests.get(url).text
-          with open("community/data/d3ward", "w") as f:
-              for line in data.split("\n"):
-                  if line.startswith("0.0.0.0 "):
-                      f.write(line.replace("0.0.0.0 ", "") + "\n")
-          EOF
 
       # --------------------------------------------------------------
       # 6. Build geosite.dat
