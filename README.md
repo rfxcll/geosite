@@ -7,8 +7,6 @@ Generate custom geosite and geoip based on [Loyalsoldier](https://github.com/Loy
 - Contains the following list:
   - `geosite:hagezi-pro-mini`
   - `geosite:hagezi-nsfw`
-  - `geosite:rule-ads`
-  - `geosite:rule-doh`
   - `geosite:rule-gaming`
   - `geosite:rule-indo`
   - `geosite:rule-playstore`
@@ -18,7 +16,6 @@ Generate custom geosite and geoip based on [Loyalsoldier](https://github.com/Loy
   - `geosite:rule-ipcheck`
   - `geosite:rule-speedtest`
   - `geosite:videoconference`
-  - `geosite:rule-malicious`
   - `geosite:urltest`
   - `geosite:openai`
   - `geosite:ecommerce-id`
